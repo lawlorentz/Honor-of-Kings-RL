@@ -51,7 +51,7 @@ class ModelConfig:
         512,
     ]
     SERI_VEC_SPLIT_SHAPE = [(725,), (84,)]
-    INIT_LEARNING_RATE_START = 0.001
+    INIT_LEARNING_RATE_START = 0.0001
     BETA_START = 0.025
     LOG_EPSILON = 1e-6
     LABEL_SIZE_LIST = [12, 16, 16, 16, 16, 8]
@@ -128,8 +128,8 @@ class Config:
     BATTLE_MODE = 2
     AISERVERPORT = [10010, 10011]
     # kinghonour: 1e-5 atari: 2.5e-4
-    INIT_LEARNING_RATE = 1e-3
-    END_LEARNING_RATE = 1e-4
+    INIT_LEARNING_RATE = 1e-4
+    END_LEARNING_RATE = 1e-5
     ALPHA = 0.5
     BETA = 0.01
     EPSILON = 1e-5
