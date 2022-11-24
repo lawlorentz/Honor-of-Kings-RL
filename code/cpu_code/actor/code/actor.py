@@ -141,22 +141,44 @@ class Actor:
                     agent.reset(Config.ENEMY_TYPE)
 
     def _save_last_sample(self, done, eval, sample_manager, state_dict):
+        WIN_REWARD=3
         if done:
+            req_pbs = self.env.cur_req_pb
+            if req_pbs[0] is None:
+                req_pb = req_pbs[1]
+            else:
+                req_pb = req_pbs[0]
+            loss_camp = -1
+            for organ in req_pb.organ_list:
+                if organ.type == 24:
+                    if organ.hp <= 0:
+                        loss_camp = organ.camp
+            
             for i, agent in enumerate(self.agents):
-                if agent.is_latest_model and not eval:
+                if agent.hero_camp == loss_camp:
+                    FINAL_REWARD=-WIN_REWARD
+                else:
+                    FINAL_REWARD=WIN_REWARD
+                # LOG.info(f'eval: {eval}')
+                # if state_dict[i]["reward"] is not None:
+                #     LOG.info(f'state_dict[{i}]["reward"]: {state_dict[i]["reward"]}')
+                # else:
+                #     LOG.info(f'state_dict[{i}]["reward"]: None')                
+                
+                if agent.is_latest_model and not eval: 
                     if state_dict[i]["reward"] is not None:
                         if type(state_dict[i]["reward"]) == tuple:
                             # if reward is a vec
                             sample_manager.save_last_sample(
-                                agent_id=i, reward=state_dict[i]["reward"][-1]
+                                agent_id=i, reward=state_dict[i]["reward"][-1]+FINAL_REWARD
                             )
                         else:
                             # if reward is a float number
                             sample_manager.save_last_sample(
-                                agent_id=i, reward=state_dict[i]["reward"]
+                                agent_id=i, reward=state_dict[i]["reward"]+FINAL_REWARD
                             )
                     else:
-                        sample_manager.save_last_sample(agent_id=i, reward=0)
+                        sample_manager.save_last_sample(agent_id=i, reward=FINAL_REWARD)
 
     def _run_episode(self, env_config, eval=False, load_models=None, eval_info=""):
         for item in g_log_time.items():
