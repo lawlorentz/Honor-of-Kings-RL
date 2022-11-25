@@ -19,7 +19,7 @@ import rl_framework.common.logging as LOG
 
 _G_CHECK_POINT_PREFIX = "checkpoints_"
 _G_RAND_MAX = 10000
-_G_MODEL_UPDATE_RATIO = 0.8
+_G_MODEL_UPDATE_RATIO = 0.6
 
 
 def cvt_infer_list_to_numpy_list(infer_list):
