@@ -141,7 +141,7 @@ class Actor:
                     agent.reset(Config.ENEMY_TYPE)
 
     def _save_last_sample(self, done, eval, sample_manager, state_dict):
-        WIN_REWARD=3
+        WIN_REWARD=5
         if done:
             req_pbs = self.env.cur_req_pb
             if req_pbs[0] is None:
@@ -224,6 +224,8 @@ class Actor:
         game_info = {}
         episode_infos = [{"h_act_num": 0} for _ in self.agents]
 
+        last_step_crystal_hprate = [1.0,1.0]
+        crystal_hprate = [1.0,1.0]
         while not done:
             log_time_func("one_frame")
             # while True:
@@ -236,6 +238,18 @@ class Actor:
                     continue
                 # print("agent{}".format(i),state_dict[i]['observation'])
                 action, d_action, sample = agent.process(state_dict[i])
+                #################################################
+                cur_req_pb=state_dict[i]['req_pb']
+                for organ in cur_req_pb.organ_list:
+                    if organ.type == 24:
+                        if not organ.camp == agent.hero_camp:
+                            crystal_hprate[i] = organ.hp/organ.max_hp
+                            break
+                crystal_hp_reward = (last_step_crystal_hprate[i] - crystal_hprate[i])*(2-crystal_hprate[i])*5
+                sample["reward"] += crystal_hp_reward
+                # LOG.info(f'{step}: agent{i} {last_step_crystal_hprate} {crystal_hprate} crystal_hp_reward: {crystal_hp_reward}')
+                last_step_crystal_hprate[i] = crystal_hprate[i]      
+                #################################################
                 if eval:
                     action = d_action
                 # print("input act: [{}], {}, {}".format(i, action, state_dict[i]["legal_action"][:12]))
