@@ -223,9 +223,14 @@ class Actor:
         log_time_func("reset", end=True)
         game_info = {}
         episode_infos = [{"h_act_num": 0} for _ in self.agents]
-
+        
+        ######################
         last_step_crystal_hprate = [1.0,1.0]
         crystal_hprate = [1.0,1.0]
+        last_step_ep_rate=1.0
+        ep_rate=1.0
+        ######################
+        
         while not done:
             log_time_func("one_frame")
             # while True:
@@ -245,9 +250,19 @@ class Actor:
                         if not organ.camp == agent.hero_camp:
                             crystal_hprate[i] = organ.hp/organ.max_hp
                             break
-                crystal_hp_reward = (last_step_crystal_hprate[i] - crystal_hprate[i])*(2-crystal_hprate[i])*5
+                crystal_hp_reward = (last_step_crystal_hprate[i] - crystal_hprate[i])*(1+2*((1-crystal_hprate[i])**2))*4
                 sample["reward"] += crystal_hp_reward
+
+                for hero in cur_req_pb.hero_list:
+                    if hero.camp == agent.hero_camp:
+                        ep_rate=hero.ep/hero.max_ep
+                ep_rate_reward=0
+                if ep_rate<last_step_ep_rate:
+                    ep_rate_reward = (last_step_ep_rate-ep_rate)*1.0
+                sample["reward"] += ep_rate_reward
                 # LOG.info(f'{step}: agent{i} {last_step_crystal_hprate} {crystal_hprate} crystal_hp_reward: {crystal_hp_reward}')
+                # LOG.info(f'{step}: agent{i} {last_step_ep_rate} {ep_rate} ep_rate_reward: {ep_rate_reward}')
+                last_step_ep_rate = ep_rate
                 last_step_crystal_hprate[i] = crystal_hprate[i]      
                 #################################################
                 if eval:
